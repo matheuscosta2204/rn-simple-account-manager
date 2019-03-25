@@ -9,10 +9,18 @@ import * as actionTypes from '../Profile/Store/Actions';
 class NewUserScreen extends React.Component {
     onClickToPic = () => {
         const options = {
-            title: 'Select Avatar',
-            storageOptions: {
-                skipBackup: true,
-                path: 'rnSimpliAccountManagerImages',
+            title: 'Selecione uma foto',
+            cancelButtonTitle: 'Cancelar',
+            takePhotoButtonTitle: 'Take Photo…',
+            chooseFromLibraryButtonTitle: 'Choose from Library…',
+            quality: 0.1,
+            allowsEditing: true,
+            permissionDenied: {
+                title: 'Permission denied',
+                text:
+                'To be able to take pictures with your camera and choose images from your library.',
+                reTryTitle: 're-try',
+                okTitle: "I'm sure",
             },
         };
         
@@ -49,8 +57,7 @@ class NewUserScreen extends React.Component {
             cpf: this.props.profile.cpf,
             foto: this.props.profile.picture.uri
         }
-        console.log(body);
-
+        
         let response = await fetch(`https://prontoachei.com.br/api/usuarios/InserirUsuario.php`, {
                 method: "POST",
                 headers: {
@@ -67,6 +74,8 @@ class NewUserScreen extends React.Component {
             let responseJson = await response.json();
             console.log(responseJson);
             if(responseJson.result) {
+                alert(responseJson.msg);
+                this.props.onPasswordChange("");
                 this.props.navigation.navigate('Login');
             } else {
                 alert(responseJson.msg);
@@ -86,6 +95,8 @@ class NewUserScreen extends React.Component {
                     placeholderTextColor="rgba(255, 255, 255, 0.5)"
                     value={this.props.profile.name}
                     onChangeText={(text) => this.changeName(text) }
+                    autoCapitalize={'words'}
+                    autoComplete={'name'}
                     style={{ height: 40, backgroundColor: 'rgba(255, 255, 255, 0.3)', width: '80%', borderRadius: 5, marginVertical: 10, color: 'white', }}/>
 
                 <TextInput 
@@ -93,6 +104,7 @@ class NewUserScreen extends React.Component {
                     placeholderTextColor="rgba(255, 255, 255, 0.5)"
                     value={this.props.profile.cpf}
                     onChangeText={(text) => this.changeCPF(text) }
+                    keyboardType={'numeric'}
                     style={{ height: 40, backgroundColor: 'rgba(255, 255, 255, 0.3)', width: '80%', borderRadius: 5, marginVertical: 10, color: 'white', }}/>
 
                 <TextInput 
@@ -100,6 +112,7 @@ class NewUserScreen extends React.Component {
                     placeholderTextColor="rgba(255, 255, 255, 0.5)"
                     value={this.props.profile.password}
                     onChangeText={(text) => this.changePass(text) }
+                    secureTextEntry={true}
                     style={{ height: 40, backgroundColor: 'rgba(255, 255, 255, 0.3)', width: '80%', borderRadius: 5, marginVertical: 10, color: 'white', }}/>
 
                 <TouchableOpacity onPress={ this.saveUser }

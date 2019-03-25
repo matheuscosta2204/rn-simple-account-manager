@@ -24,7 +24,7 @@ class LoginScreen extends React.Component {
     }
 
     authenticate = async () => {
-        let response = await fetch(`https://prontoachei.com.br/api/usuarios/Login.php?cpf=${this.props.profile.cpf}&senha=123456`, {
+        let response = await fetch(`https://prontoachei.com.br/api/usuarios/Login.php?cpf=${this.props.profile.cpf}&senha=${this.props.profile.password}`, {
                 method: "GET",
                 headers: {
                     'Content-Type': 'application/json'
@@ -35,8 +35,10 @@ class LoginScreen extends React.Component {
             })
 
         if (response.status === 200) {
-            let responseJson = await response.json();            
+            let responseJson = await response.json();
             if(responseJson.result) {
+                let data = JSON.parse(responseJson.data)[0];
+                this.props.onSetUser(data);
                 this.props.navigation.navigate('Profile');
             } else {
                 alert(responseJson.msg);
@@ -44,6 +46,17 @@ class LoginScreen extends React.Component {
         }
     }
 
+    goTo = () => {
+        this.props.onSetUser({
+            idUser: "",
+            name: "",
+            cpf: "",
+            password: "",
+            picture: require('../../Assets/Images/inv-user.png'),
+        });
+        this.props.navigation.navigate('NewUser');
+    }
+    
     render() {
         return (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: '#393E46' }}>
@@ -53,6 +66,7 @@ class LoginScreen extends React.Component {
                     placeholderTextColor="rgba(255, 255, 255, 0.5)"
                     value={this.props.profile.cpf}
                     onChangeText={(text) => this.changeCPF(text) }
+                    keyboardType={'numeric'}
                     style={{ height: 40, backgroundColor: 'rgba(255, 255, 255, 0.3)', width: '80%', borderRadius: 5, marginVertical: 10, color: 'white', }}/>
 
                 <TextInput 
@@ -60,6 +74,7 @@ class LoginScreen extends React.Component {
                     placeholderTextColor="rgba(255, 255, 255, 0.5)"
                     value={this.props.profile.password}
                     onChangeText={(text) => this.changePass(text) }
+                    secureTextEntry={true}
                     style={{ height: 40, backgroundColor: 'rgba(255, 255, 255, 0.3)', width: '80%', borderRadius: 5, marginVertical: 10, color: 'white', }}/>
 
                 <TouchableOpacity onPress={ this.signIn }
@@ -75,7 +90,7 @@ class LoginScreen extends React.Component {
                         style={{ color: 'white' }}>
                         Login</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => this.props.navigation.navigate('NewUser')}
+                <TouchableOpacity onPress={ this.goTo }
                     style={{
                         alignItems: 'center',
                         backgroundColor: '#01ACB5',
@@ -103,6 +118,7 @@ const mapDispatchToProps = dispatch => {
     return {
         onCPFChange: (cpf) => dispatch({ type: actionTypes.CPF_CHANGED, cpf }),
         onPasswordChange: (password) => dispatch({ type: actionTypes.PASSWORD_CHANGED, password }),
+        onSetUser:  (user) => dispatch({ type: actionTypes.SET_USER, user }),
     }
 };
 
